@@ -1,0 +1,6 @@
+flask
+torch
+transformers>=4.0.0
+pyvi
+gensim
+numpy

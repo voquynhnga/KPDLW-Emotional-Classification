@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân loại Cảm xúc Tiếng Việt</title>
+    <!-- Nhúng Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script> <!-- Version cụ thể hơn -->
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef1f5; /* Nền xám nhạt hơn */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 25px 35px;
+            border-radius: 10px; /* Bo góc nhiều hơn */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Shadow nhẹ nhàng hơn */
+            width: 100%;
+            max-width: 850px; /* Rộng hơn chút */
+            box-sizing: border-box;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #1d2129; /* Màu tối hơn */
+            margin-bottom: 25px;
+        }
+        h1 {
+             font-size: 2em;
+        }
+        h2 {
+             font-size: 1.3em;
+             color: #4b4f56;
+             margin-top: 30px;
+        }
+
+        /* Input Area */
+        textarea {
+            width: 100%; /* Chiếm toàn bộ chiều rộng container (padding đã tính) */
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ccd0d5;
+            border-radius: 6px;
+            font-size: 1rem;
+            min-height: 90px;
+            resize: vertical;
+            box-sizing: border-box; /* Quan trọng */
+            line-height: 1.4;
+        }
+        textarea:focus {
+             border-color: #007bff;
+             outline: none;
+             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        button {
+            padding: 12px 25px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            display: block;
+            margin: 5px auto 25px auto;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:active {
+            background-color: #004085;
+        }
+
+        /* Results Area */
+        .results-container {
+            display: grid; /* Sử dụng Grid Layout */
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Cột tự động điều chỉnh */
+            gap: 25px;
+            margin-top: 20px;
+        }
+        .result-column {
+            background-color: #f7f8fa; /* Màu nền sáng hơn chút */
+            padding: 20px;
+            border: 1px solid #e4e6eb;
+            border-radius: 8px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column; /* Sắp xếp nội dung theo cột */
+        }
+        .result-column h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #606770; /* Màu tiêu đề phụ */
+            border-bottom: 1px solid #dddfe2;
+            padding-bottom: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        #originalTextOutput {
+             word-wrap: break-word;
+             white-space: pre-wrap; /* Giữ các khoảng trắng và xuống dòng */
+             flex-grow: 1; /* Cho phép nó giãn ra nếu cần */
+             font-size: 0.95em;
+             line-height: 1.5;
+        }
+        #predictionOutput {
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+        }
+        .label {
+             font-weight: bold;
+             font-size: 1.5em; /* To hơn */
+             padding: 8px 15px;
+             border-radius: 5px;
+             display: inline-block;
+        }
+        /* Màu sắc cụ thể hơn */
+        .positive { color: #1c6b0a; background-color: #d4edda; border: 1px solid #c3e6cb; } /* Xanh lá */
+        .negative { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; } /* Đỏ */
+        .neutral { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; } /* Vàng */
+        .error-message { color: #721c24; font-weight: bold; } /* Màu báo lỗi */
+
+        #loading {
+            display: none;
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        #chartContainer {
+             height: 280px; /* Cao hơn chút */
+             position: relative;
+             width: 100%; /* Chiếm đủ chiều rộng cột */
+        }
+        canvas {
+            max-width: 100%; /* Đảm bảo không tràn */
+        }
+         /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px 20px;
+            }
+            h1 { font-size: 1.5em; }
+            .results-container {
+                grid-template-columns: 1fr; /* Chỉ 1 cột trên màn hình nhỏ */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phân loại Cảm xúc Bình luận</h1>
+        <textarea id="commentInput" placeholder="Nhập bình luận của bạn vào đây..."></textarea>
+        <button id="submitButton" onclick="getSentiment()">Phân loại</button>
+
+        <div id="loading">Đang xử lý, vui lòng chờ...</div>
+
+        <div class="results-container" id="resultsSection" style="display: none;"> <!-- Ẩn ban đầu -->
+            <div class="result-column">
+                <h3>Văn bản gốc</h3>
+                <div id="originalTextOutput"></div>
+            </div>
+
+            <div class="result-column">
+                <h3>Dự đoán</h3>
+                <div id="predictionOutput"></div>
+            </div>
+
+            <div class="result-column">
+                <h3>Phân bổ Xác suất</h3>
+                <div id="chartContainer">
+                     <canvas id="probabilityChart"></canvas>
+                </div>
+                 <div id="chartError" class="error-message" style="display: none; text-align: center; margin-top: 10px;"></div>
+            </div>
+        </div>
+        <div id="errorSection" class="error-message" style="text-align: center; margin-top: 20px; display: none;"></div> <!-- Khu vực báo lỗi chung -->
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const commentInput = document.getElementById('commentInput');
+        const submitButton = document.getElementById('submitButton');
+        const originalTextOutput = document.getElementById('originalTextOutput');
+        const predictionOutput = document.getElementById('predictionOutput');
+        const loadingIndicator = document.getElementById('loading');
+        const chartCanvas = document.getElementById('probabilityChart').getContext('2d');
+        const chartContainer = document.getElementById('chartContainer');
+        const chartErrorDiv = document.getElementById('chartError');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorSection = document.getElementById('errorSection');
+        let probabilityChartInstance = null;
+
+        // --- Configuration (MUST MATCH BACKEND's CLASS_NAMES ORDER) ---
+        const classLabels = ['Tiêu cực', 'Trung bình', 'Tích cực'];
+        const classColors = {
+            'Tiêu cực': 'rgba(255, 99, 132, 0.6)',  // Red
+            'Trung bình': 'rgba(255, 206, 86, 0.6)', // Yellow/Orange
+            'Tích cực': 'rgba(75, 192, 192, 0.6)', // Green/Teal
+        };
+        const classBorderColors = {
+             'Tiêu cực': 'rgba(255, 99, 132, 1)',
+             'Trung bình': 'rgba(255, 206, 86, 1)',
+             'Tích cực': 'rgba(75, 192, 192, 1)',
+        };
+
+        // --- Event Listener for Enter Key in Textarea ---
+        commentInput.addEventListener('keypress', function(event) {
+            // Check if Ctrl+Enter or Cmd+Enter is pressed
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault(); // Prevent default newline behavior
+                getSentiment(); // Trigger prediction
+            }
+        });
+
+        // --- Main Prediction Function ---
+        async function getSentiment() {
+            const text = commentInput.value.trim();
+
+            // --- Reset UI ---
+            clearResultsAndErrors();
+            if (!text) {
+                showError("Vui lòng nhập bình luận.");
+                return;
+            }
+            loadingIndicator.style.display = 'block';
+            submitButton.disabled = true; // Disable button during processing
+
+            // --- API Call ---
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text }),
+                    signal: AbortSignal.timeout(30000) // Timeout 30 giây
+                });
+
+                if (!response.ok) {
+                    let errorMsg = `Lỗi ${response.status}: `;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg += errorData.error || 'Không thể xử lý yêu cầu.';
+                    } catch {
+                        errorMsg += 'Phản hồi không hợp lệ từ máy chủ.';
+                    }
+                    throw new Error(errorMsg); // Throw error to be caught below
+                }
+
+                const data = await response.json(); // Get successful response
+
+                // --- Display Results ---
+                if (data.error) { // Handle application-level errors from backend
+                    throw new Error(data.error);
+                } else {
+                    displayResults(text, data.predicted_label, data.probabilities);
+                    resultsSection.style.display = 'grid'; // Show results section
+                }
+
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                let displayError = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+                if (error.name === 'AbortError') {
+                     displayError = 'Yêu cầu đã hết thời gian chờ.';
+                } else if (error.message) {
+                     displayError = error.message; // Show specific error from backend or fetch
+                }
+                 showError(displayError);
+            } finally {
+                // --- Always re-enable button and hide loading ---
+                loadingIndicator.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        }
+
+        // --- UI Helper Functions ---
+        function clearResultsAndErrors() {
+            originalTextOutput.innerHTML = '';
+            predictionOutput.innerHTML = '';
+            errorSection.style.display = 'none';
+            errorSection.textContent = '';
+            resultsSection.style.display = 'none'; // Hide results until successful
+            chartErrorDiv.style.display = 'none';
+            chartErrorDiv.textContent = '';
+            // Clear previous chart
+            if (probabilityChartInstance) {
+                probabilityChartInstance.destroy();
+                probabilityChartInstance = null;
+            }
+        }
+
+        function showError(message) {
+            errorSection.textContent = message;
+            errorSection.style.display = 'block';
+            resultsSection.style.display = 'none'; // Hide results on error
+        }
+
+        function displayResults(originalText, predictedLabel, probabilities) {
+            // Display original text
+            originalTextOutput.textContent = originalText;
+
+            // Display prediction label
+            let labelClass = 'neutral'; // Default
+            if (predictedLabel === 'Tích cực') labelClass = 'positive';
+            else if (predictedLabel === 'Tiêu cực') labelClass = 'negative';
+            predictionOutput.innerHTML = `<span class="label ${labelClass}">${predictedLabel}</span>`;
+
+            // Display chart
+            if (probabilities && typeof probabilities === 'object' && Object.keys(probabilities).length > 0) {
+                // Ensure data is in the correct order and format
+                const chartData = classLabels.map(label => probabilities[label] || 0);
+                const backgroundColors = classLabels.map(label => classColors[label] || '#cccccc');
+                const borderColors = classLabels.map(label => classBorderColors[label] || '#aaaaaa');
+                displayChart(chartData, backgroundColors, borderColors);
+                 chartContainer.style.display = 'block'; // Ensure container is visible
+            } else {
+                // Handle case where probabilities are missing or invalid
+                chartContainer.style.display = 'none'; // Hide chart container
+                chartErrorDiv.textContent = "Không có dữ liệu xác suất để hiển thị.";
+                chartErrorDiv.style.display = 'block';
+                console.warn("Probabilities data missing or invalid:", probabilities);
+            }
+        }
+
+        function displayChart(data, backgroundColors, borderColors) {
+             // Destroy previous chart if exists
+             if (probabilityChartInstance) {
+                probabilityChartInstance.destroy();
+             }
+             // Create new chart
+             probabilityChartInstance = new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: classLabels,
+                    datasets: [{
+                        label: 'Xác suất',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Vẽ biểu đồ cột ngang cho dễ đọc nhãn dài
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { // Trục X bây giờ là xác suất
+                            beginAtZero: true,
+                            max: 1.0,
+                            title: { display: true, text: 'Xác suất' },
+                            ticks: { // Format ticks as percentages
+                                callback: function(value) {
+                                    return (value * 100).toFixed(0) + '%';
+                                }
+                            }
+                        },
+                        y: { // Trục Y bây giờ là tên lớp
+                            title: { display: false } // Không cần title cho trục Y
+                        }
+                    },
+                    plugins: {
+                         legend: { display: false },
+                         tooltip: {
+                             callbacks: {
+                                 label: function(context) {
+                                     return ` ${(context.parsed.x * 100).toFixed(2)}%`;
+                                 }
+                             }
+                         }
+                    }
+                }
+             });
+        }
+    </script>
+</body>
+</html>
