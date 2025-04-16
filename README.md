@@ -20,3 +20,8 @@ This project builds a sentiment classification system for Vietnamese comments in
 *   **Machine Learning & Data:** Scikit-learn, Pandas, Numpy
 *   **Visualization (Training):** Matplotlib, Seaborn
 *   **Visualization (Web App):** Chart.js
+
+# Use
+* Download and unzip **phobert_sentiment_fold.zip**: [Link](https://drive.google.com/drive/folders/1tmm6rFgs_qLR5ZpgG6m_fn2yOl0qW1r3?usp=sharing)
+* pip install -r requirements.txt
+* python3 app.py
