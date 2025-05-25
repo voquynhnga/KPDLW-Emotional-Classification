@@ -26,7 +26,7 @@ class TIKICrawler:
         
         try:
             driver.get(url)
-            time.sleep(5)
+            # time.sleep(5)
             wait = WebDriverWait(driver, 5)
             
             # Scroll down to load content
@@ -51,7 +51,7 @@ class TIKICrawler:
                         print(f"Cannot navigate to next page, stopping...")
                         break
                         
-                    time.sleep(2)
+                    time.sleep(1)
                     
                 except Exception as e:
                     print(f"Error on page {page + 1}: {e}")
