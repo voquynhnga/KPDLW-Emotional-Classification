@@ -3,67 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phân tích đánh giá Sản phẩm - Điện máy xanh</title>
+    <title>Phân tích & So sánh Đánh giá Sản phẩm</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Phân tích đánh giá sản phẩm</h1>
+            <h1>Phân tích & So sánh Đánh giá Sản phẩm</h1>
         </div>
-        
-        <div class="input-section">
 
-            
-            <!-- Single Product Mode -->
-            <div id="singleMode" class="input-mode">
-                <div class="input-group">
-                    <label for="productUrl">🔗 Link sản phẩm Điện máy xanh hoặc Tiki:</label>
-                    <input type="url" id="productUrl" class="url-input" />
-                </div>
-                <button id="analyzeBtn" class="analyze-btn" onclick="analyzeProduct()">
-                    Phân tích
-                </button>
+        <div class="input-section">
+            <div class="mode-toggle">
+                <button id="singleModeBtn" class="mode-btn active" onclick="setMode('single')">Phân tích 1 sản phẩm</button>
+                <button id="compareModeBtn" class="mode-btn" onclick="setMode('compare')">So sánh 2 sản phẩm</button>
             </div>
+
+            <div id="productInputs">
+                <div class="input-group product-input-group" id="product1Group">
+                    <label for="productUrl1" id="productUrl1Label">🔗 Link sản phẩm (Điện máy xanh hoặc Tiki):</label>
+                    <input type="url" id="productUrl1" class="url-input" placeholder="Dán link sản phẩm vào đây" />
+                </div>
+                <div class="input-group product-input-group" id="product2Group" style="display: none;">
+                    <label for="productUrl2">🔗 Link sản phẩm 2 (Điện máy xanh hoặc Tiki):</label>
+                    <input type="url" id="productUrl2" class="url-input" placeholder="Dán link sản phẩm thứ hai để so sánh" />
+                </div>
+            </div>
+
+            <button id="analyzeBtn" class="analyze-btn" onclick="startAnalysis()">
+                Phân tích
+            </button>
         </div>
-        
+
         <div id="loading" class="loading">
             <div class="loading-spinner"></div>
-            Đang thu thập và phân tích đánh giá sản phẩm...
+            Đang thu thập và phân tích đánh giá...
         </div>
-        
+
         <div id="errorSection" class="error-section"></div>
-        
-        <div id="resultsSection" class="results-section">
-            
-            <!-- Overview Grid -->
-            <div class="overview-grid">
-             
-                <!-- Chart -->
-                <div class="stats-card">
-                    <h3>Biểu đồ đánh giá</h3>
-                    <div class="chart-container">
-                        <canvas id="sentimentChart"></canvas>
+
+        <div id="resultsContainer">
+            <div id="resultsSection1" class="results-section product-results">
+                <h2 class="product-title" id="productTitle1">Kết quả Phân tích</h2>
+                <div class="overview-grid">
+                    <div class="stats-card">
+                        <h3>Biểu đồ đánh giá</h3>
+                        <div class="chart-container">
+                            <canvas id="sentimentChart1"></canvas>
+                        </div>
                     </div>
                 </div>
+                <div id="commentsSection1" class="comments-section"></div>
+                <div class="recommendation-card">
+                    <div id="recommendationResult1" class="recommendation-result"></div>
+                    <div id="recommendationReason1" class="recommendation-reason"></div>
+                </div>
             </div>
-            
-            <!-- Representative Comments -->
-            <div id="commentsSection" class="comments-section"></div>
-            
-            <!-- Recommendation -->
-            <div class="recommendation-card">
-                <div id="recommendationResult" class="recommendation-result"></div>
-                <div id="recommendationReason" class="recommendation-reason"></div>
+
+            <div id="resultsSection2" class="results-section product-results" style="display: none;">
+                <h2 class="product-title" id="productTitle2">Kết quả cho Sản phẩm 2</h2>
+                <div class="overview-grid">
+                    <div class="stats-card">
+                        <h3>Biểu đồ đánh giá</h3>
+                        <div class="chart-container">
+                            <canvas id="sentimentChart2"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div id="commentsSection2" class="comments-section"></div>
+                <div class="recommendation-card">
+                    <div id="recommendationResult2" class="recommendation-result"></div>
+                    <div id="recommendationReason2" class="recommendation-reason"></div>
+                </div>
             </div>
         </div>
-    </div>
 
+        <div id="comparisonSection" class="comparison-section results-section" style="display: none;">
+            <h2>So sánh và Gợi ý</h2>
+            <div id="comparisonResultText" class="comparison-text"></div>
+            <div class="comparison-details">
+                <div class="comparison-item">
+                    <h4>Sản phẩm 1</h4>
+                    <p id="comparisonProd1Stats"></p>
+                </div>
+                <div class="comparison-item">
+                    <h4>Sản phẩm 2</h4>
+                    <p id="comparisonProd2Stats"></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-        
-    </script>
 </body>
 </html>
