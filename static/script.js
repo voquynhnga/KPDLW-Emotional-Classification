@@ -20,8 +20,7 @@ const recommendationReason2 = document.getElementById('recommendationReason2');
 
 const comparisonSection = document.getElementById('comparisonSection');
 const comparisonResultText = document.getElementById('comparisonResultText');
-const comparisonProd1Stats = document.getElementById('comparisonProd1Stats');
-const comparisonProd2Stats = document.getElementById('comparisonProd2Stats');
+
 
 const product1Group = document.getElementById('product1Group');
 const product2Group = document.getElementById('product2Group');
@@ -294,10 +293,8 @@ function displayChart(sentiments, canvasId, existingChartInstance) {
                         if (value === 0 && parseFloat(percentage) === 0) return '';
                         return `${value}\n(${percentage}%)`;
                     },
-                    color: '#fff',
-                    font: { weight: 'bold', size: 10 },
-                    textStrokeColor: '#000',
-                    textStrokeWidth: 2,
+                    color: '#000',
+                    font: {size: 10 },
                     textAlign: 'center'
                 }
             }
@@ -386,23 +383,6 @@ function performComparison(data1, data2) {
          comparisonMessage = `Cả hai sản phẩm có điểm đánh giá tổng hợp khá tương đồng (SP1: ${score1.toFixed(1)}, SP2: ${score2.toFixed(1)}). <br>Hãy xem xét kỹ các bình luận chi tiết, tính năng cụ thể của từng sản phẩm và nhu cầu cá nhân để đưa ra lựa chọn tốt nhất.`;
     }
     comparisonResultText.innerHTML = comparisonMessage;
-
-    comparisonProd1Stats.innerHTML = `
-        URL: <a href="${data1.product_url}" target="_blank" rel="noopener noreferrer">${truncateUrl(data1.product_url, 30)}</a><br>
-        Tổng đánh giá: ${total1}<br>
-        Tích cực: ${stats1["Tích cực"] || 0} (${positivePercentage1.toFixed(1)}%)<br>
-        Trung bình: ${stats1["Trung bình"] || 0}<br>
-        Tiêu cực: ${stats1["Tiêu cực"] || 0}<br>
-        Khuyến nghị: ${data1.recommendation.decision} (Độ tin cậy: ${(confidence1 * 100).toFixed(1)}%)
-    `;
-    comparisonProd2Stats.innerHTML = `
-        URL: <a href="${data2.product_url}" target="_blank" rel="noopener noreferrer">${truncateUrl(data2.product_url, 30)}</a><br>
-        Tổng đánh giá: ${total2}<br>
-        Tích cực: ${stats2["Tích cực"] || 0} (${positivePercentage2.toFixed(1)}%)<br>
-        Trung bình: ${stats2["Trung bình"] || 0}<br>
-        Tiêu cực: ${stats2["Tiêu cực"] || 0}<br>
-        Khuyến nghị: ${data2.recommendation.decision} (Độ tin cậy: ${(confidence2 * 100).toFixed(1)}%)
-    `;
 }
 
 
@@ -432,8 +412,6 @@ function clearAllResults() {
 
 
     comparisonResultText.innerHTML = '';
-    comparisonProd1Stats.innerHTML = '';
-    comparisonProd2Stats.innerHTML = '';
 }
 
 function showError(message) {

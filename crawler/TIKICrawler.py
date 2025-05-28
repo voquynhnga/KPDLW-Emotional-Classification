@@ -12,11 +12,13 @@ import time
 class TIKICrawler:
     def __init__(self):
         self.options = Options()
-        self.options.add_argument('--headless')
+        self.options.add_argument('--headless')  # không cần hiển thị giao diện
         self.options.add_argument('--disable-gpu')
         self.options.add_argument('--no-sandbox')
         self.options.add_argument('--disable-dev-shm-usage')
-        self.options.add_argument('--window-size=1920,1080')
+        self.options.add_argument('--disable-extensions')
+        self.options.add_argument('--disable-software-rasterizer')  # tránh fallback WebGL
+        self.options.add_argument('--remote-debugging-port=9222')
         self.STOP_KEYWORD = "(*) Đánh giá không tính điểm"
    
     def get_comments(self, url, max_pages=20):

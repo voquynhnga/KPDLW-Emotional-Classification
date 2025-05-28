@@ -19,7 +19,7 @@ class Config:
     
     # Analysis settings
     DEFAULT_PAGE_LIMIT = 20
-    MAX_REPRESENTATIVE_COMMENTS = 5
+    MAX_REPRESENTATIVE_COMMENTS = 3
     
     @classmethod
     def setup_warnings(cls):
